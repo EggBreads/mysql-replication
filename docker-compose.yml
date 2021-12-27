@@ -1,43 +1,41 @@
-version: "3.8"
-
+version: '3'
 services:
-  mysql-master:
-    image: mysql:8.0
-    environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
-      MYSQL_DATABASE: 'shopping'
-      MYSQL_USER: 'admin'
-      MYSQL_PASSWORD: '1234'
-      
-      
-    ports:
-      - '3307:3306'
-    volumes:
-      - master:/var/lib/mysql
-      - master:/var/lib/mysql-files
-    networks:
-      - mysql-local-bridge
-
-  mysql-slave:
-    image: mysql:8.0
-    environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
-      MYSQL_DATABASE: 'shopping'
-      MYSQL_USER: 'admin'
-      MYSQL_PASSWORD: '1234'
-      
-    ports:
-      - '3308:3306'
-    volumes:
-      - slave:/var/lib/mysql
-      - slave:/var/lib/mysql-files
-    networks:
-      - mysql-local-bridge
-
-volumes:
   master:
+    image: mysql:8.0.21
+    volumes:
+      - /Users/deuksoomoon/front-workspace/mysql-master-slave/conf/master:/etc/mysql/conf.d
+      - /Users/deuksoomoon/front-workspace/mysql-master-slave/logs:/var/log/mysql
+      - /Users/deuksoomoon/front-workspace/mysql-master-slave/db/master:/db
+    environment:
+      - TZ=Asia/Seoul
+      - MYSQL_ROOT_PASSWORD=1234
+      - MYSQL_DATABASE=db_test
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=1234
+    ports:
+      - "3007:3306"
+    networks:
+      - mysql-bridge     
+
   slave:
+    image: mysql:8.0.21
+    volumes:
+      - /Users/deuksoomoon/front-workspace/mysql-master-slave/conf/slave:/etc/mysql/conf.d
+      - /Users/deuksoomoon/front-workspace/mysql-master-slave/logs:/var/log/mysql
+      - /Users/deuksoomoon/front-workspace/mysql-master-slave/db/slave:/db
+    depends_on:
+      - master
+    environment:
+      - TZ=Asia/Seoul
+      - MYSQL_ROOT_PASSWORD=1234
+      - MYSQL_DATABASE=db_test
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=1234
+    ports:
+      - "3008:3306"
+    networks:
+      - mysql-bridge
 
 networks:
-  mysql-local-bridge:
+  mysql-bridge:
     driver: bridge
